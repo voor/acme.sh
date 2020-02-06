@@ -13,6 +13,7 @@ dns_azure_add() {
   fulldomain=$1
   txtvalue=$2
 
+  AZUREDNS_CLOUD="${AZUREDNS_CLOUD:-$(_readaccountconf_mutable AZUREDNS_CLOUD)}"
   AZUREDNS_SUBSCRIPTIONID="${AZUREDNS_SUBSCRIPTIONID:-$(_readaccountconf_mutable AZUREDNS_SUBSCRIPTIONID)}"
   AZUREDNS_TENANTID="${AZUREDNS_TENANTID:-$(_readaccountconf_mutable AZUREDNS_TENANTID)}"
   AZUREDNS_APPID="${AZUREDNS_APPID:-$(_readaccountconf_mutable AZUREDNS_APPID)}"
@@ -69,7 +70,7 @@ dns_azure_add() {
   _debug _sub_domain "$_sub_domain"
   _debug _domain "$_domain"
 
-  acmeRecordURI="https://management.azure.com$(printf '%s' "$_domain_id" | sed 's/\\//g')/TXT/$_sub_domain?api-version=2017-09-01"
+  acmeRecordURI="https://management.usgovcloudapi.net$(printf '%s' "$_domain_id" | sed 's/\\//g')/TXT/$_sub_domain?api-version=2017-09-01"
   _debug "$acmeRecordURI"
   # Get existing TXT record
   _azure_rest GET "$acmeRecordURI" "" "$accesstoken"
@@ -115,6 +116,7 @@ dns_azure_rm() {
   fulldomain=$1
   txtvalue=$2
 
+  AZUREDNS_CLOUD="${AZUREDNS_CLOUD:-$(_readaccountconf_mutable AZUREDNS_CLOUD)}"
   AZUREDNS_SUBSCRIPTIONID="${AZUREDNS_SUBSCRIPTIONID:-$(_readaccountconf_mutable AZUREDNS_SUBSCRIPTIONID)}"
   AZUREDNS_TENANTID="${AZUREDNS_TENANTID:-$(_readaccountconf_mutable AZUREDNS_TENANTID)}"
   AZUREDNS_APPID="${AZUREDNS_APPID:-$(_readaccountconf_mutable AZUREDNS_APPID)}"
@@ -166,7 +168,7 @@ dns_azure_rm() {
   _debug _sub_domain "$_sub_domain"
   _debug _domain "$_domain"
 
-  acmeRecordURI="https://management.azure.com$(printf '%s' "$_domain_id" | sed 's/\\//g')/TXT/$_sub_domain?api-version=2017-09-01"
+  acmeRecordURI="https://management.usgovcloudapi.net$(printf '%s' "$_domain_id" | sed 's/\\//g')/TXT/$_sub_domain?api-version=2017-09-01"
   _debug "$acmeRecordURI"
   # Get existing TXT record
   _azure_rest GET "$acmeRecordURI" "" "$accesstoken"
@@ -281,7 +283,7 @@ _azure_getaccess_token() {
   export _H1="accept: application/json"
   export _H2="Content-Type: application/x-www-form-urlencoded"
 
-  body="resource=$(printf "%s" 'https://management.core.windows.net/' | _url_encode)&client_id=$(printf "%s" "$clientID" | _url_encode)&client_secret=$(printf "%s" "$clientSecret" | _url_encode)&grant_type=client_credentials"
+  body="resource=$(printf "%s" 'https://management.core.usgovcloudapi.net/' | _url_encode)&client_id=$(printf "%s" "$clientID" | _url_encode)&client_secret=$(printf "%s" "$clientSecret" | _url_encode)&grant_type=client_credentials"
   _secure_debug2 "data $body"
   response="$(_post "$body" "https://login.microsoftonline.com/$tenantID/oauth2/token" "" "POST")"
   _ret="$?"
@@ -316,7 +318,7 @@ _get_root() {
   ## (ZoneListResult with  continuation token for the next page of results)
   ## Per https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits#dns-limits you are limited to 100 Zone/subscriptions anyways
   ##
-  _azure_rest GET "https://management.azure.com/subscriptions/$subscriptionId/providers/Microsoft.Network/dnszones?\$top=500&api-version=2017-09-01" "" "$accesstoken"
+  _azure_rest GET "https://management.usgovcloudapi.net/subscriptions/$subscriptionId/providers/Microsoft.Network/dnszones?\$top=500&api-version=2017-09-01" "" "$accesstoken"
   # Find matching domain name in Json response
   while true; do
     h=$(printf "%s" "$domain" | cut -d . -f $i-100)
